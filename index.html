@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Data Rumah Sakit</title>
+  <style>
+    body {
+      background: linear-gradient(to right, #97F2F3, #F1E0B0);
+      margin: 0;
+      font-family: Arial, sans-serif;
+      position: relative;
+    }
+
+    header {
+      background: linear-gradient(to right, #3498db, #2980b9);
+      color: white;
+      padding: 5px;
+      text-align: center;
+      position: fixed;
+      width: 100%;
+      top: -50px;
+      z-index: 1;
+      display: none;
+    }
+
+    button {
+      margin: 2px;
+      background: linear-gradient(to right, #3498db, #2980b9);
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 50%;
+    }
+
+    #header h1 {
+      font-size: 20px;
+    }
+
+    button#toggleBtn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: #c7ecc7;
+    }
+
+    #welcomeMessage {
+      text-align: left;
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      font-family: 'Verdana', sans-serif;
+      opacity: 0;
+      animation: fadeIn 2s ease-in-out forwards;
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding-top: 50px;
+    }
+
+    @keyframes loader {
+      0% {transform: rotate(-45deg)}
+      50% {transform: rotate(-135deg)}
+      100% {transform: rotate(-225deg)}
+    }
+
+    @keyframes span-1 {
+      0% {transform: translate(0);}
+      50% {transform: translate(-50px, 0);border-color: #EE4D68}
+      100% {transform: translate(0);}
+    }
+
+    @keyframes span-2 {
+      0% {transform: translate(0);}
+      50% {transform: translate(50px, 0);border-color: #875678}
+      100% {transform: translate(0);}
+    }
+
+    @keyframes span-3 {
+      0% {transform: translate(0);}
+      50% {transform: translate(0, -50px);border-color: #FF9900}
+      100% {transform: translate(0);}
+    }
+
+    @keyframes span-4 {
+      0% {transform: translate(0);}
+      50% {transform: translate(0, 50px);border-color: #00E4F6}
+      100% {transform: translate(0);}
+    }
+
+    .loader {
+      width: 50px;
+      height: 50px;
+      position: relative;
+      animation: loader 2s infinite ease-in-out;
+    }
+
+    .loader span {
+      width: 50px;
+      height: 50px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      border: 4px solid #0B1B48;
+    }
+
+    .loader span:nth-child(1) {
+      animation: span-1 2s ease-in-out infinite;
+    }
+
+    .loader span:nth-child(2) {
+      animation: span-2 2s ease-in-out infinite;
+    }
+
+    .loader span:nth-child(3) {
+      animation: span-3 2s ease-in-out infinite;
+    }
+
+    .loader span:nth-child(4) {
+      animation: span-4 2s ease-in-out infinite;
+    }
+
+    #content {
+      width: 70%;
+      margin: auto;
+    }
+
+    #container {
+      padding: 20px;
+    }
+
+    @keyframes fadeInHeader {
+      0% {
+        top: -50px; 
+      }
+      100% {
+        top: 0; 
+      }
+    }
+
+    @keyframes fadeOutHeader {
+      0% {
+        top: 0;
+      }
+      100% {
+        top: -50px; 
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="loader" id="loader">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <button id="toggleBtn" style="display: none;" onclick="toggleHeader()">🔰</button>
+
+  <header id="header">
+    <h1>🏥Data Rumah Sakit</h1>
+    <button onclick="showKabupaten()">Data Kabupaten</button>
+    <button onclick="showKota()">Data Kota</button>
+    <button onclick="showRumahSakit()">Data Rumah Sakit</button>
+    <button id="closeBtn" onclick="toggleHeader()"> ❌ </button>
+  </header>
+
+  <div id="content" style="display: none;">
+    <div id="container"></div>
+    <div id="welcomeMessage" style="display: block;"><h1>🔰Selamat Datang!!</h1><br>Disini Kami menyediakan berbagai macam informasi mengenai Data Rumah Sakit</div>
+  </div>
+
+  <script>
+    const header = document.getElementById("header");
+    const loader = document.getElementById("loader");
+    const content = document.getElementById("content");
+    const toggleBtn = document.getElementById("toggleBtn");
+
+    let isFirstLoad = true;
+
+    setTimeout(() => {
+      loader.style.display = "none";
+      content.style.display = "block";
+      toggleBtn.style.display = "block";
+      if (isFirstLoad) {
+        document.getElementById("welcomeMessage").style.display = "block";
+        isFirstLoad = false;
+      }
+    }, 5000);
+
+    const container = document.getElementById("container");
+    let activeButton = null;
+
+    async function getbrita1() {
+      const ambildata1 = await fetch("https://rs-bed-covid-api.vercel.app/api/get-provinces");
+      const brita1 = await ambildata1.json();
+      console.log(brita1);
+
+      container.innerHTML = "<h2>DATA KABUPATEN</h2>";
+      brita1.provinces.forEach((element) => {
+        container.innerHTML += `<p>Id: ${element.id}</p>`;
+        container.innerHTML += `<p>Nama Kabupaten: ${element.name}</p>`;
+      });
+    }
+
+    async function getbrita2() {
+      const ambildata2 = await fetch("https://rs-bed-covid-api.vercel.app/api/get-cities?provinceid=51prop");
+      const brita2 = await ambildata2.json();
+      console.log(brita2);
+
+      container.innerHTML = "<h2>DATA KOTA</h2>";
+      brita2.cities.forEach((element) => {
+        container.innerHTML += `<p>Id: ${element.id}</p>`;
+        container.innerHTML += `<p>Nama Kota: ${element.name}</p>`;
+      });
+    }
+
+    async function getbrita3() {
+      const ambildata3 = await fetch("https://rs-bed-covid-api.vercel.app/api/get-hospitals?provinceid=51prop&cityid=5171&type=1");
+      const brita3 = await ambildata3.json();
+      console.log(brita3);
+
+      container.innerHTML = "<h2>DATA RUMAH SAKIT</h2>";
+      brita3.hospitals.forEach((element) => {
+        container.innerHTML += `<p>Id: ${element.id}</p>`;
+        container.innerHTML += `<p>Nama Rumah Sakit: ${element.name}</p>`;
+        container.innerHTML += `<p>Alamat: ${element.address}</p>`;
+        container.innerHTML += `<p>Nomer: ${element.phone}</p>`;
+        container.innerHTML += `<p>Antrian: ${element.queue}</p>`;
+        container.innerHTML += `<p>Kapasitas: ${element.bed_availability}</p>`;
+        container.innerHTML += `<p>Info: ${element.info}</p>`;
+      });
+    }
+
+    function showKabupaten() {
+      toggleButtonColor('Daftar Kabupaten');
+      getbrita1();
+      toggleWelcomeMessage();
+    }
+
+    function showKota() {
+      toggleButtonColor('Daftar Kota');
+      getbrita2();
+      toggleWelcomeMessage();
+    }
+
+    function showRumahSakit() {
+      toggleButtonColor('Daftar Rumah Sakit');
+      getbrita3();
+      toggleWelcomeMessage();
+    }
+
+    function toggleWelcomeMessage() {
+      const welcomeMessage = document.getElementById("welcomeMessage");
+      welcomeMessage.style.display = "none";
+    }
+
+    function toggleButtonColor(clickedButton) {
+      if (activeButton) {
+        const activeButtonElement = document.querySelector(`button[onclick="${activeButton}"]`);
+        if (activeButtonElement) {
+          activeButtonElement.classList.remove("clicked");
+        }
+      }
+
+      activeButton = clickedButton;
+      const clickedButtonElement = document.querySelector(`button[onclick="${clickedButton}"]`);
+      if (clickedButtonElement) {
+        clickedButtonElement.classList.add("clicked");
+      }
+    }
+
+    function toggleHeader() {
+      const headerStyle = header.style;
+      const headerHeight = header.offsetHeight;
+
+      if (headerStyle.display === "none" || headerStyle.top === `-${headerHeight}px`) {
+        headerStyle.top = "0";
+        headerStyle.display = "block";
+        headerStyle.animation = "fadeInHeader 0.5s ease-in-out forwards";
+      } else {
+        headerStyle.top = `-${headerHeight}px`;
+        headerStyle.animation = "fadeOutHeader 0.5s ease-in-out forwards";
+        setTimeout(() => {
+          headerStyle.display = "none";
+          headerStyle.animation = "";
+        }, 500);
+      }
+    }
+  </script>
+</body>
+
+</html>
